@@ -1,9 +1,27 @@
 import time
 import pyautogui
 
-sx, sy = 2343, 126
-w, h = 952, 714
-ex, ey = sx+w, sy+h
+print("Point your mouse at the top left portion of your desired area, \
+       and then press Enter.")
+
+input()
+
+posTL = pyautogui.position()
+
+print("Got position", posTL)
+
+print("Point your mouse at the bottom right portion of your desired area, \
+       and then press Enter.")
+
+input()
+
+posBR = pyautogui.position()
+
+print("Got position", posBR)
+
+sx, sy = posTL[0], posTL[1]
+ex, ey = posBR[0], posBR[1]
+w, h = ex-sx, ey-sy
 dx, dy = int(round(w * 0.1)), int(round(h * 0.1))
 
 numPixels = len(range(sx, ex, dx)) * len(range(sy, ey, dy))
