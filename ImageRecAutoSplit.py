@@ -6,7 +6,7 @@ from tkinter import *
 window = Tk()
 
 window.title("SHVR Auto Split")
-window.geometry('500x500')
+window.geometry('500x200')
 
 debugText = StringVar()
 debugText.set("Point your mouse at\nthe top left portion\nof your desired area,\n and then press Enter.")
@@ -31,7 +31,7 @@ print("Got position", posTL)
 debugText.set("Point your mouse at\nthe bottom right portion\nof your desired area,\n and then press Enter.")
 window.mainloop()
 
-debugText.set("White Pixels: ?%\nDark Frames: ?")
+debugText.set("\nWhite Pixels: ?%\nDark Frames: ?")
 window.update()
 
 posBR = pyautogui.position()
@@ -70,8 +70,9 @@ def splitLoop():
 
         if prevStateFrames >= stateThreshold and stateFrames == 0:
             print("-----------------\nNEW LEVEL SEGMENT\n-----------------")
-
-        debugText.set("White Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
+            debugText.set("\n-----------------\nNEW LEVEL SEGMENT\n-----------------")
+        else:
+            debugText.set("\nWhite Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
 
         #window.update()
         
