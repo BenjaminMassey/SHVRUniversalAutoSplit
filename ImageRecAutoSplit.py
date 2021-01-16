@@ -1,4 +1,5 @@
 import time
+import threading
 import pyautogui
 from tkinter import *
 
@@ -37,40 +38,48 @@ posBR = pyautogui.position()
 
 print("Got position", posBR)
 
-sx, sy = posTL[0], posTL[1]
-ex, ey = posBR[0], posBR[1]
-w, h = ex-sx, ey-sy
-dx, dy = int(round(w * 0.1)), int(round(h * 0.1))
+def splitLoop():
+    global posTL, posBR
+    sx, sy = posTL[0], posTL[1]
+    ex, ey = posBR[0], posBR[1]
+    w, h = ex-sx, ey-sy
+    dx, dy = int(round(w * 0.1)), int(round(h * 0.1))
 
-numPixels = len(range(sx, ex, dx)) * len(range(sy, ey, dy))
+    numPixels = len(range(sx, ex, dx)) * len(range(sy, ey, dy))
 
-pixelThreshold = 12
-stateThreshold = 3
+    pixelThreshold = 12
+    stateThreshold = 3
 
-stateFrames = 0
-
-running = True
-while running:
-    pixelCount = 0
-    for x in range(sx, ex, dx):
-        for y in range(sy, ey, dy):
-            if (pyautogui.pixelMatchesColor(x, y, (255,255,255), tolerance=40)):
-                pixelCount += 1
-
-    prevStateFrames = stateFrames
-
-    pixelPercent = int(round((100 * (pixelCount / numPixels))))
-    if pixelPercent < pixelThreshold:
-        stateFrames += 1
-    else:
-        stateFrames = 0
-
-    if prevStateFrames >= stateThreshold and stateFrames == 0:
-        print("-----------------\nNEW LEVEL SEGMENT\n-----------------")
-
-    debugText.set("White Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
-
-    window.update()
+    stateFrames = 0
     
-    print("White Pixels:", str(pixelPercent) + "%",
-          " | Dark Frames:", stateFrames)
+    running = True
+    while running:
+        pixelCount = 0
+        for x in range(sx, ex, dx):
+            for y in range(sy, ey, dy):
+                if (pyautogui.pixelMatchesColor(x, y, (255,255,255), tolerance=40)):
+                    pixelCount += 1
+
+        prevStateFrames = stateFrames
+
+        pixelPercent = int(round((100 * (pixelCount / numPixels))))
+        if pixelPercent < pixelThreshold:
+            stateFrames += 1
+        else:
+            stateFrames = 0
+
+        if prevStateFrames >= stateThreshold and stateFrames == 0:
+            print("-----------------\nNEW LEVEL SEGMENT\n-----------------")
+
+        debugText.set("White Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
+
+        #window.update()
+        
+        print("White Pixels:", str(pixelPercent) + "%",
+              " | Dark Frames:", stateFrames)
+
+splitter = threading.Thread(target=splitLoop)
+splitter.start()
+
+window.mainloop()
+
