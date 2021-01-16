@@ -1,19 +1,37 @@
 import time
 import pyautogui
+from tkinter import *
 
-print("Point your mouse at the top left portion of your desired area, \
-       and then press Enter.")
+window = Tk()
 
-input()
+window.title("SHVR Auto Split")
+window.geometry('500x500')
+
+debugText = StringVar()
+debugText.set("Point your mouse at\nthe top left portion\nof your desired area,\n and then press Enter.")
+
+debugLabel = Label(window, textvariable=debugText)
+debugLabel.config(font=("Courier", 24))
+debugLabel.pack()
+
+# https://stackoverflow.com/a/47476389
+def enter(event=None):
+    print("ENTER :)")
+    global window
+    window.quit()
+window.bind('<Return>', enter)
+
+window.mainloop()
 
 posTL = pyautogui.position()
 
 print("Got position", posTL)
 
-print("Point your mouse at the bottom right portion of your desired area, \
-       and then press Enter.")
+debugText.set("Point your mouse at\nthe bottom right portion\nof your desired area,\n and then press Enter.")
+window.mainloop()
 
-input()
+debugText.set("White Pixels: ?%\nDark Frames: ?")
+window.update()
 
 posBR = pyautogui.position()
 
@@ -31,7 +49,8 @@ stateThreshold = 3
 
 stateFrames = 0
 
-while True:
+running = True
+while running:
     pixelCount = 0
     for x in range(sx, ex, dx):
         for y in range(sy, ey, dy):
@@ -48,6 +67,10 @@ while True:
 
     if prevStateFrames >= stateThreshold and stateFrames == 0:
         print("-----------------\nNEW LEVEL SEGMENT\n-----------------")
+
+    debugText.set("White Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
+
+    window.update()
     
     print("White Pixels:", str(pixelPercent) + "%",
           " | Dark Frames:", stateFrames)
