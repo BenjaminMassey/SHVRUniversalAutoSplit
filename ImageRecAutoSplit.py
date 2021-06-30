@@ -2,14 +2,61 @@ import time
 import threading
 import pyautogui
 from tkinter import *
+import win32api, win32con
+from keylist import *
 
 window = Tk()
 
 window.title("SHVR Auto Split")
-window.geometry('500x200')
+window.geometry('500x250')
+
+key = None
+
+try:
+	file = open("key.txt", "r")
+	content = file.readline()
+	if len(content) > 0 and content in VK_CODE:
+		key = VK_CODE[content]
+	else:
+		key = VK_CODE['end']
+	file.close()
+except:
+	key = VK_CODE['end']
+
+def setkey(self, *args):
+	global key, keyselect, VK_CODE
+	key = VK_CODE[keyselect.get()]
+	file = open("key.txt", 'w')
+	file.write(keyselect.get())
+	file.close()
+
+keyselect = StringVar()
+keys = list(VK_CODE.keys())
+
+file = open("key.txt")
+keyselect.set(file.readline())
+file.close()
+
+splitKeyLabel = Label(window, text="Split Key:").pack()
+
+selector = OptionMenu(window, keyselect, *keys).pack()
+keyselect.trace('w', setkey)
+
+try:
+	setkey()
+except:
+	pass
+
+def split():
+	global key
+	win32api.keybd_event(key, 0,0,0)
+	time.sleep(.05)
+	win32api.keybd_event(key,0 ,win32con.KEYEVENTF_KEYUP ,0)
+
+#testButton = Button(window, text="Split", command=split).pack()
 
 debugText = StringVar()
-debugText.set("Point your mouse at\nthe top left portion\nof your desired area,\n and then press Enter.")
+debugText.set("\nPoint your mouse at\nthe top left portion\nof your desired area,\n and then press Enter.")
 
 debugLabel = Label(window, textvariable=debugText)
 debugLabel.config(font=("Courier", 24))
@@ -28,18 +75,21 @@ posTL = pyautogui.position()
 
 print("Got position", posTL)
 
-debugText.set("Point your mouse at\nthe bottom right portion\nof your desired area,\n and then press Enter.")
+debugText.set("\nPoint your mouse at\nthe bottom right portion\nof your desired area,\n and then press Enter.")
 window.mainloop()
 
-debugText.set("\nWhite Pixels: ?%\nDark Frames: ?")
+debugText.set("\nSetting up...")
+#debugText.set("\nWhite Pixels: ?%\nDark Frames: ?")
 window.update()
 
 posBR = pyautogui.position()
 
 print("Got position", posBR)
 
+section = 1
+
 def splitLoop():
-    global posTL, posBR
+    global section, posTL, posBR
     sx, sy = posTL[0], posTL[1]
     ex, ey = posBR[0], posBR[1]
     w, h = ex-sx, ey-sy
@@ -69,10 +119,13 @@ def splitLoop():
             stateFrames = 0
 
         if prevStateFrames >= stateThreshold and stateFrames == 0:
-            print("-----------------\nNEW LEVEL SEGMENT\n-----------------")
-            debugText.set("\n-----------------\nNEW LEVEL SEGMENT\n-----------------")
+            print("-----------------\nSPLIT\n-----------------")
+            debugText.set("\n-----------------\nSPLIT\n-----------------")
+            split()
+            section += 1
         else:
-            debugText.set("\nWhite Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
+            #debugText.set("\nWhite Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
+            debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
 
         #window.update()
         
