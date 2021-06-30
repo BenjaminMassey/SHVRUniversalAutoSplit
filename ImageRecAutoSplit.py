@@ -49,9 +49,9 @@ except:
 
 def split():
 	global key
-	win32api.keybd_event(key, 0,0,0)
+	win32api.keybd_event(key,0,0,0)
 	time.sleep(.05)
-	win32api.keybd_event(key,0 ,win32con.KEYEVENTF_KEYUP ,0)
+	win32api.keybd_event(key,0,win32con.KEYEVENTF_KEYUP,0)
 
 #testButton = Button(window, text="Split", command=split).pack()
 
@@ -64,9 +64,9 @@ debugLabel.pack()
 
 # https://stackoverflow.com/a/47476389
 def enter(event=None):
-    print("ENTER :)")
-    global window
-    window.quit()
+	print("ENTER :)")
+	global window
+	window.quit()
 window.bind('<Return>', enter)
 
 window.mainloop()
@@ -86,51 +86,63 @@ posBR = pyautogui.position()
 
 print("Got position", posBR)
 
-section = 1
+section = 0
 
 def splitLoop():
-    global section, posTL, posBR
-    sx, sy = posTL[0], posTL[1]
-    ex, ey = posBR[0], posBR[1]
-    w, h = ex-sx, ey-sy
-    dx, dy = int(round(w * 0.1)), int(round(h * 0.1))
+	global section, posTL, posBR
+	sx, sy = posTL[0], posTL[1]
+	ex, ey = posBR[0], posBR[1]
+	w, h = ex-sx, ey-sy
+	dx, dy = int(round(w * 0.1)), int(round(h * 0.1))
 
-    numPixels = len(range(sx, ex, dx)) * len(range(sy, ey, dy))
+	numPixels = len(range(sx, ex, dx)) * len(range(sy, ey, dy))
 
-    pixelThreshold = 12
-    stateThreshold = 3
+	pixelThreshold = 12
+	stateThreshold = 3
 
-    stateFrames = 0
-    
-    running = True
-    while running:
-        pixelCount = 0
-        for x in range(sx, ex, dx):
-            for y in range(sy, ey, dy):
-                if (pyautogui.pixelMatchesColor(x, y, (255,255,255), tolerance=40)):
-                    pixelCount += 1
+	stateFrames = 0
+	
+	running = True
+	while running:
+		
+		pixelCount = 0
+		for x in range(sx, ex, dx):
+			for y in range(sy, ey, dy):
+				if (pyautogui.pixelMatchesColor(x, y, (255,255,255), tolerance=40)):
+					pixelCount += 1
 
-        prevStateFrames = stateFrames
-
-        pixelPercent = int(round((100 * (pixelCount / numPixels))))
-        if pixelPercent < pixelThreshold:
-            stateFrames += 1
-        else:
-            stateFrames = 0
-
-        if prevStateFrames >= stateThreshold and stateFrames == 0:
-            print("-----------------\nSPLIT\n-----------------")
-            debugText.set("\n-----------------\nSPLIT\n-----------------")
-            split()
-            section += 1
-        else:
-            #debugText.set("\nWhite Pixels: " + str(pixelPercent) + "%\n" + "Dark Frames: " + str(stateFrames))
-            debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
-
-        #window.update()
-        
-        print("White Pixels:", str(pixelPercent) + "%",
-              " | Dark Frames:", stateFrames)
+		prevStateFrames = stateFrames
+		
+		pixelPercent = int(round((100 * (pixelCount / numPixels))))
+		if pixelPercent < pixelThreshold:
+			stateFrames += 1
+		else:
+			stateFrames = 0
+		
+		transition = False;
+		
+		if section == 4:
+			if stateFrames > 2:
+				transition = True
+		elif section > 0 and section < 4:
+			if prevStateFrames >= stateThreshold and stateFrames == 0:
+				transition = True
+		elif section == 0:
+			# NEED LOGIC HERE
+			transition = True
+		else:
+			print("Should not be here >:(")
+		
+		if transition:
+			print("-----------------\nSPLIT\n-----------------")
+			debugText.set("\n-----------------\nSPLIT\n-----------------")
+			split()
+			section += 1
+		else:
+			debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
+		
+		print("White Pixels:", str(pixelPercent) + "%",
+			  " | Dark Frames:", stateFrames)
 
 splitter = threading.Thread(target=splitLoop)
 splitter.start()
