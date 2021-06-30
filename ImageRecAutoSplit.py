@@ -106,9 +106,19 @@ def splitLoop():
 	while running:
 		
 		pixelCount = 0
+		
+		color = None
+		thresh = None
+		if section == 0:
+			color = (135,0,0)
+			thresh = 80
+		else:
+			color = (255,255,255)
+			thresh = 40
+			
 		for x in range(sx, ex, dx):
 			for y in range(sy, ey, dy):
-				if (pyautogui.pixelMatchesColor(x, y, (255,255,255), tolerance=40)):
+				if (pyautogui.pixelMatchesColor(x, y, color, tolerance=thresh)):
 					pixelCount += 1
 
 		prevStateFrames = stateFrames
@@ -121,17 +131,14 @@ def splitLoop():
 		
 		transition = False;
 		
-		if section == 4:
+		if section == 0 or section == 4:
 			if stateFrames > 2:
 				transition = True
-		elif section > 0 and section < 4:
+				prevStateFrames = 0
+				stateFrames = 0
+		else:
 			if prevStateFrames >= stateThreshold and stateFrames == 0:
 				transition = True
-		elif section == 0:
-			# NEED LOGIC HERE
-			transition = True
-		else:
-			print("Should not be here >:(")
 		
 		if transition:
 			print("-----------------\nSPLIT\n-----------------")
