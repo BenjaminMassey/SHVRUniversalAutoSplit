@@ -102,6 +102,7 @@ def splitLoop():
 
 	stateFrames = 0
 	
+	started = False
 	running = True
 	while running:
 		
@@ -124,14 +125,22 @@ def splitLoop():
 		prevStateFrames = stateFrames
 		
 		pixelPercent = int(round((100 * (pixelCount / numPixels))))
+		if not started:
+			if pixelPercent > 2:
+				started = True
+				print("STARTED!")
+				stateFrames = 0
 		if pixelPercent < pixelThreshold:
 			stateFrames += 1
 		else:
 			stateFrames = 0
 		
+		if not started:
+			continue
+		
 		transition = False;
 		
-		if section == 0 or section == 4:
+		if section == 0 or section == 6:
 			if stateFrames > 2:
 				transition = True
 				prevStateFrames = 0
@@ -144,9 +153,17 @@ def splitLoop():
 			print("-----------------\nSPLIT\n-----------------")
 			debugText.set("\n-----------------\nSPLIT\n-----------------")
 			split()
-			section += 1
+			if section == 6:
+				section = 0
+				started = False
+				debugText.set("\nSetting up...")
+			else:
+				section += 1
 		else:
-			debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
+			if section == 0:
+				debugText.set("\nWaiting for murder...")
+			else:
+				debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
 		
 		print("White Pixels:", str(pixelPercent) + "%",
 			  " | Dark Frames:", stateFrames)
