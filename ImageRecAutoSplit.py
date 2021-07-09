@@ -53,7 +53,13 @@ def split():
 	time.sleep(.05)
 	win32api.keybd_event(key,0,win32con.KEYEVENTF_KEYUP,0)
 
-#testButton = Button(window, text="Split", command=split).pack()
+def reset():
+	global section, started
+	section = 0
+	started = False
+	debugText.set("\nSetting up...")
+
+resetButton = Button(window, text="Reset", command=reset).pack()
 
 debugText = StringVar()
 debugText.set("\nPoint your mouse at\nthe top left portion\nof your desired area,\n and then press Enter.")
@@ -87,9 +93,10 @@ posBR = pyautogui.position()
 print("Got position", posBR)
 
 section = 0
+started = False
 
 def splitLoop():
-	global section, posTL, posBR
+	global section, started, posTL, posBR
 	sx, sy = posTL[0], posTL[1]
 	ex, ey = posBR[0], posBR[1]
 	w, h = ex-sx, ey-sy
@@ -102,9 +109,11 @@ def splitLoop():
 
 	stateFrames = 0
 	
-	started = False
 	running = True
 	while running:
+		
+		if not started:
+			stateFrames = 0
 		
 		pixelCount = 0
 		
@@ -113,9 +122,11 @@ def splitLoop():
 		if section == 0:
 			color = (135,0,0)
 			thresh = 80
+			pixelThreshold = 8
 		else:
 			color = (255,255,255)
 			thresh = 40
+			pixelThreshold = 12
 			
 		for x in range(sx, ex, dx):
 			for y in range(sy, ey, dy):
@@ -165,8 +176,7 @@ def splitLoop():
 			else:
 				debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
 		
-		print("White Pixels:", str(pixelPercent) + "%",
-			  " | Dark Frames:", stateFrames)
+		print("Match Pixels:", str(pixelPercent) + "%", " | Consecutive Off Frames:", stateFrames)
 
 splitter = threading.Thread(target=splitLoop)
 splitter.start()
