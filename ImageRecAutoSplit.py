@@ -8,7 +8,7 @@ from keylist import *
 window = Tk()
 
 window.title("SHVR Auto Split")
-window.geometry('500x250')
+window.geometry('500x300')
 
 key = None
 
@@ -54,7 +54,7 @@ def split():
 	win32api.keybd_event(key,0,win32con.KEYEVENTF_KEYUP,0)
 
 def reset():
-	global section, started
+	global section, started, color
 	section = 0
 	started = False
 	debugText.set("\nSetting up...")
@@ -137,7 +137,7 @@ def splitLoop():
 		
 		pixelPercent = int(round((100 * (pixelCount / numPixels))))
 		if not started:
-			if pixelPercent > 2:
+			if pixelPercent > pixelThreshold and color == (135,0,0):
 				started = True
 				print("STARTED!")
 				stateFrames = 0
@@ -176,7 +176,7 @@ def splitLoop():
 			else:
 				debugText.set("\nIn Section " + str(section) + "\n\nRunning...")
 		
-		print("Match Pixels:", str(pixelPercent) + "%", " | Consecutive Off Frames:", stateFrames)
+		print("Red" if color[0] == 135 else "White", "Pixels:", str(pixelPercent) + "%", " | Consecutive Off Frames:", stateFrames)
 
 splitter = threading.Thread(target=splitLoop)
 splitter.start()
