@@ -19,9 +19,13 @@ try:
 		key = VK_CODE[content]
 	else:
 		key = VK_CODE['end']
+		file.write('end')
 	file.close()
 except:
+	file = open("key.txt", "w")
 	key = VK_CODE['end']
+	file.write('end')
+	file.close()
 
 def setkey(self, *args):
 	global key, keyselect, VK_CODE
